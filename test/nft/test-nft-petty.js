@@ -24,7 +24,7 @@ describe("Petty", function () {
       expect(mintTx).to.be.emit(nft,"Transfer").withArgs(address0, accountA.address, 1);
       expect(await nft.ownerOf(1)).to.be.equal(accountA.address);
       expect(await nft.balanceOf(accountA.address)).to.be.equal(1);
-      
+
       const mintBTx = await nft.mint(accountB.address);
       expect(mintBTx).to.be.emit(nft,"Transfer").withArgs(address0, accountB.address, 2);
       expect(await nft.ownerOf(2)).to.be.equal(accountB.address);

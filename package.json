@@ -1,5 +1,7 @@
 {
+  "version": "0.0.1",
   "name": "hardhat-project",
+  "license": "MIT",
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.0",
     "@nomiclabs/hardhat-etherscan": "^3.0.4",
