@@ -40,3 +40,33 @@ Then, copy the deployment address and paste it in to replace `DEPLOYED_CONTRACT_
 ```shell
 npx hardhat verify --network ropsten DEPLOYED_CONTRACT_ADDRESS "Hello, Hardhat!"
 ```
+
+# Deploy & Verify
+
+Deployed information
+```shell
+
+Gold deployed to  0x49e3a80eff7BeE1b115E1c58A835d8cB992768ef
+Petty deployed to  0xb9401264F5C1bfe2c9E3c4aF83709Aa93B22097c
+Reserve deployed to  0x835B3C94eCdfc4cdb800b990e1f37f2827EF7c54
+Marketplace deployed to  0x4FAD032d378111fC345F38ff7e3203E461Fc11a4
+Gold is payment token true or false: true
+
+```
+
+Verify after deploy~~~~
+```shell
+
+Gold:
+yarn hardhat verify --network testnet 0x49e3a80eff7BeE1b115E1c58A835d8cB992768ef "10000000"
+
+Petty:
+yarn hardhat verify --network testnet 0xb9401264F5C1bfe2c9E3c4aF83709Aa93B22097c
+
+Reserve:
+yarn hardhat verify --network testnet 0x835B3C94eCdfc4cdb800b990e1f37f2827EF7c54 "0x49e3a80eff7BeE1b115E1c58A835d8cB992768ef"
+
+Marketplace:
+yarn hardhat verify --network testnet 0x4FAD032d378111fC345F38ff7e3203E461Fc11a4 "0xb9401264F5C1bfe2c9E3c4aF83709Aa93B22097c" "0" "0" "0x835B3C94eCdfc4cdb800b990e1f37f2827EF7c54"
+
+```

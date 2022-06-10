@@ -216,7 +216,7 @@ describe("Marketplace", function() {
       expect(await petty.balanceOf(marketplace.address)).to.be.equal(0);
     });
   });
-  
+
   describe("executeOrder()", function() {
     beforeEach(async function() {
       await petty.mint(seller.address);
@@ -227,35 +227,62 @@ describe("Marketplace", function() {
     it("should revert if order was canceled", async function() {
       await marketplace.connect(seller).cancelOrder(1);
       const buyTx = marketplace.connect(buyer).executeOrder(1);
-      await expect(buyTx).to.be.revertedWith("NFTMarketplace: This order was canceled");
+      await expect(buyTx)
+        .to
+        .be
+        .revertedWith("NFTMarketplace: This order was canceled");
     });
     it("should revert if sender is seller", async function() {
       const buyTx = marketplace.connect(seller).executeOrder(1);
-      await expect(buyTx).to.be.revertedWith("NFTMarketplace: Sender must not buyer");
+      await expect(buyTx)
+        .to
+        .be
+        .revertedWith("NFTMarketplace: Sender must not buyer");
     });
     it("should revert if order was sold", async function() {
       await marketplace.connect(buyer).executeOrder(1);
       await gold.connect(buyer).approve(marketplace.address, defaultPrice);
       const buyTx = marketplace.connect(buyer).executeOrder(1);
-      await expect(buyTx).to.be.revertedWith("NFTMarketplace: This order was sold");
+      await expect(buyTx)
+        .to
+        .be
+        .revertedWith("NFTMarketplace: This order was sold");
     });
-    it("should revert if token balance of sender is not enough", async function() {
-      await gold.connect(buyer).transfer(seller.address, defaultBalance);
-      const buyTx = marketplace.connect(buyer).executeOrder(1);
-      await expect(buyTx).to.be.revertedWith("NFTMarketplace: Not enough tokens");
-    });
+    it("should revert if token balance of sender is not enough",
+      async function() {
+        await gold.connect(buyer).transfer(seller.address, defaultBalance);
+        const buyTx = marketplace.connect(buyer).executeOrder(1);
+        await expect(buyTx)
+          .to
+          .be
+          .revertedWith("NFTMarketplace: Not enough tokens");
+      });
     it("should revert if sender did not approve tokens", async function() {
       await gold.connect(buyer).approve(marketplace.address, 0);
       const buyTx = marketplace.connect(buyer).executeOrder(1);
-      await expect(buyTx).to.be.revertedWith("NFTMarketplace: Not approve enough tokens");
+      await expect(buyTx)
+        .to
+        .be
+        .revertedWith("NFTMarketplace: Not approve enough tokens");
     });
-    it("should buy correctly with default fee", async function() {
+    it("should buy correctly with default fee (10%)", async function() {
       // buy token 1
       const buyTx = marketplace.connect(buyer).executeOrder(1);
       await expect(buyTx).to.emit(marketplace, "OrderMatched")
-        .withArgs(1, seller.address, buyer.address, 1, gold.address, defaultPrice);
+        .withArgs(1, seller.address, buyer.address, 1, gold.address,
+          defaultPrice);
       expect(await petty.ownerOf(1)).to.be.equal(buyer.address);
       expect(await petty.balanceOf(buyer.address)).to.be.equal(1);
+      expect(await gold.balanceOf(buyer.address))
+        .to
+        .be
+        .equal(defaultBalance.sub(defaultPrice));
+      const feeAmount = defaultPrice.mul(10).div(100);
+      expect(await gold.balanceOf(feeRecipient.address)).to.be.equal(feeAmount);
+      expect(await gold.balanceOf(seller.address))
+        .to
+        .be
+        .equal(defaultBalance.add(defaultPrice.sub(feeAmount)));
 
       // sell token 2
       await petty.mint(seller.address);
@@ -266,31 +293,43 @@ describe("Marketplace", function() {
       await gold.connect(buyer).approve(marketplace.address, defaultPrice);
       const buyTx2 = marketplace.connect(buyer).executeOrder(2);
       await expect(buyTx2).to.emit(marketplace, "OrderMatched")
-        .withArgs(2, seller.address, buyer.address, 2, gold.address, defaultPrice);
+        .withArgs(2, seller.address, buyer.address, 2, gold.address,
+          defaultPrice);
       expect(await petty.ownerOf(2)).to.be.equal(buyer.address);
       expect(await petty.balanceOf(buyer.address)).to.be.equal(2);
     });
-    it("should buy correctly with fee = 0",async function() {
+    it("should buy correctly with fee = 0", async function() {
       await marketplace.updateFee(0, 0);
       const buyTx = marketplace.connect(buyer).executeOrder(1);
       await expect(buyTx).to.emit(marketplace, "OrderMatched")
-        .withArgs(1, seller.address, buyer.address, 1, gold.address, defaultPrice);
+        .withArgs(1, seller.address, buyer.address, 1, gold.address,
+          defaultPrice);
       expect(await petty.ownerOf(1)).to.be.equal(buyer.address);
       expect(await petty.balanceOf(buyer.address)).to.be.equal(1);
+      expect(await gold.balanceOf(buyer.address))
+        .to
+        .be
+        .equal(defaultBalance.sub(defaultPrice));
+      expect(await gold.balanceOf(seller.address))
+        .to
+        .be
+        .equal(defaultBalance.add(defaultPrice));
     });
-    it("should buy correctly with fee = 49%",async function() {
+    it("should buy correctly with fee = 49%", async function() {
       await marketplace.updateFee(49, 0);
       const buyTx = marketplace.connect(buyer).executeOrder(1);
       await expect(buyTx).to.emit(marketplace, "OrderMatched")
-        .withArgs(1, seller.address, buyer.address, 1, gold.address, defaultPrice);
+        .withArgs(1, seller.address, buyer.address, 1, gold.address,
+          defaultPrice);
       expect(await petty.ownerOf(1)).to.be.equal(buyer.address);
       expect(await petty.balanceOf(buyer.address)).to.be.equal(1);
     });
-    it("should buy correctly with fee = 10.11111%",async function() {
+    it("should buy correctly with fee = 10.11111%", async function() {
       await marketplace.updateFee(1011111, 5);
       const buyTx = marketplace.connect(buyer).executeOrder(1);
       await expect(buyTx).to.emit(marketplace, "OrderMatched")
-        .withArgs(1, seller.address, buyer.address, 1, gold.address, defaultPrice);
+        .withArgs(1, seller.address, buyer.address, 1, gold.address,
+          defaultPrice);
       expect(await petty.ownerOf(1)).to.be.equal(buyer.address);
       expect(await petty.balanceOf(buyer.address)).to.be.equal(1);
     });
